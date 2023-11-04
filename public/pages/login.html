@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teszt</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/1.4.6/tailwind.min.css" />
+    <script src="../assets/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="../css/login.css">
+</head>
+<body>
+
+<ul class="ul">
+    <li class="li" >
+        <a class="li-a" href="index.html">Kezdőlap</a>
+    </li>
+    <li class="li" onmouseover="beadol()" onmouseout="kiadol()">
+    <script>
+    function beadol() {
+      let menu = [document.getElementById("ads-menu1"), document.getElementById("ads-menu2")];
+      menu.forEach(elem =>{elem.style.display = "block"});
+    }
+    function kiadol() {
+      let kiadolmenu = [document.getElementById("ads-menu1"), document.getElementById("ads-menu2")];
+      kiadolmenu.forEach(elem =>{elem.style.display = "none"});
+    }
+    </script>
+      <ul style="padding: 0;"><a class="li-a" href="" >Hirdetések</a>
+        <li id="ads-menu2" style="list-style-type: none;display:none; "><a class="li-a" href="servers/servers.php">Keresés</a></li>   
+        <li id="ads-menu1" style="list-style-type: none; display:none"><a class="li-a" href="server/server.php">Készítés</a></li>                         
+      </ul>
+    </li>
+
+    <li class="li">
+      <ul style="padding: 0;"><a class="li-a" href="" id="">Beszélgetések</a></ul>
+    </li>
+
+    <li class="li">
+        <ul style="padding: 0;"><a class="li-a" href="" id="">Hiba bejelentés</a></ul>
+    </li>
+    <li class="li" style="float: right;">
+        <ul style="padding: 0;"><a class="li-a" href="pages/login.html" id="">Bejelentkezés</a></ul>
+      </li>
+  </ul>
+      
+    <div id="loginpanel">
+        <h1 style="margin-bottom: 20px; font-size: 35px;">Login</h1>
+        <input style="margin: 20px; background-color: #121212; font-weight: bolder;" id="usrname" type="text" placeholder="Username"> <br>
+        <input style="margin-top: 20px; background-color: #121212; margin-bottom: 1%; font-weight: bolder;" id="passwd" type="password" placeholder="Password"> <br>
+        <a style="cursor: pointer;">Forgot Password?</a> <br>
+        <button class="logregbuttons" style="margin-top: 30px;" id="loginbutton">Login</button>
+        <p style="font-size: 15px;">Don't have an account? <a style="font-weight: bolder; cursor: pointer;" onclick="RegPanel()">Register</a></p>
+    </div>
+    <div style="display: none;" id="registrationpanel">
+        <h1 style="margin-bottom: 20px; font-size: 35px;">Registration</h1>
+        <input style="margin: 20px; background-color: #121212; font-weight: bolder;" id="registrationusrname" type="text" placeholder="Username"> <br>
+        <input style="margin: 20px; background-color: #121212; font-weight: bolder;" id="registrationpasswd" type="password" placeholder="Password"> <br>
+        <input style="margin: 20px; background-color: #121212; font-weight: bolder;" id="registrationemail" type="email" placeholder="Email"> <br>
+        <button class="logregbuttons" id="registrationbutton">Registration</button>
+        <p>Already have an account? <a style="font-weight: bolder; cursor: pointer;" onclick="LogPanel()">Login</a></p>
+    </div>
+</body>
+</html>
+<script>
+    var loginpanel = document.getElementById("loginpanel");
+    var registerpanel = document.getElementById("registrationpanel");
+    function RegPanel(){ loginpanel.style.display = "none"; registerpanel.style.display = "block"; }
+    function LogPanel(){ registerpanel.style.display = "none"; loginpanel.style.display = "block"; }
+
+    $(document).ready(function(){
+        $("#registrationbutton").click(function(){
+            var data ={};
+            data.Uname = $('#registrationusrname').val();
+            data.Passwd = $('#registrationpasswd').val();
+            data.Email = $('#registrationemail').val();
+            $.post("/registration", 
+            { 
+                data: data
+            });
+        });
+    });
+        
+    $(document).ready(function(){
+        $("#loginbutton").click(function(){
+            var data ={};
+            data.Uname = $('#usrname').val();
+            data.Passwd = $('#passwd').val();
+            $.post("/login", 
+            { 
+                data: data
+            });
+        });
+    });
+</script>
