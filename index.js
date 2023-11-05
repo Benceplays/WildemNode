@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql');
 const bodyParser = require('body-parser');
 const crypto = require('crypto')
+const bcrypt = require("bcrypt")
 const app    = express();
 const port   = 3000;
 app.use(express.static('public')); 
@@ -21,44 +22,51 @@ app.use(
   }),
 );
 
-app.post('/login',(req, res) => {
+app.post('/login', (req, res) => {
   JSON.parse(JSON.stringify(req.body));
-  let encryptedpasswd = crypto.createHash('md5').update(req.body["data"]["Passwd"]).digest("hex")
-  var sql = `SELECT * FROM users WHERE username='${req.body["data"]["Uname"]}' AND password='${encryptedpasswd}'`;
-  conn.query(sql, function (err, result, fields) {
-    if (err) {
-      console.error('Adatbázis hiba: ' + err);
-      res.send('Hiba történt az adatbáziskapcsolat során.');
-    } else {
-      if (result.length > 0) {
+  var sql = `SELECT * FROM users WHERE username='${req.body["data"]["Uname"]}'`;
+  conn.query(sql, async function (err, result, fields) {
+    if(result.length == 1){
+      let isValid = await bcrypt.compare(req.body["data"]["Passwd"], result[0]["password"])
+      if (isValid) {
         console.log("Sikeres bejelentkezés.")
-      } 
+      }  
       else {
         console.log("Felhasználónév vagy jelszó téves.")
       }
-    } 
+    }else {
+        console.log("Felhasználónév vagy jelszó téves.")
+      }
   });
 });
 
-app.post('/registration',(req, res) => {
+app.post('/registration',async (req, res) => { // Frontend oldalon majd, email formátumot is nézze, jelszó/felhasználó hosszt, stb.
   JSON.parse(JSON.stringify(req.body));
-  let query = `INSERT INTO users (username, password, email) VALUES (?, ?, ?);`;
+  let sql = `INSERT INTO users (username, password, email) VALUES (?, ?, ?);`;
   let username = req.body["data"]["Uname"];
-  let password = crypto.createHash('md5').update(req.body["data"]["Passwd"]).digest("hex");
+  let salt = bcrypt.genSaltSync(12);
+  let password = await bcrypt.hash(req.body["data"]["Passwd"], salt);
   let email = req.body["data"]["Email"];
-  conn.query("SELECT * FROM users", function (err, result, fields){
-    if (!result){
-      if (result[0]["username"] != username && username.length <= 32 && username.length >= 2){
-        conn.query(query, [username, password, email], (err, rows) => { 
+  //Ha a felhasználó név nem foglalt
+  conn.query(`SELECT * FROM users WHERE username='${req.body["data"]["Uname"]}'`, (err, result) =>{
+    if(result.length == 0){
+    //Ha az email nem foglalt
+      conn.query(`SELECT * FROM users WHERE email='${req.body["data"]["Email"]}'`, (err, result) =>{
+       if(result.length == 0){
+        conn.query(sql, [username, password, email], (err, rows) => { 
           console.log("A regisztracio sikeres volt.");
-      });}
-      else { console.log("A felhasználó név foglalt."); }
+        })
+       }
+       else{
+         console.log("Ezzel az email címmel már regisztráltak");
+       }
+      })
+
     }
     else{
-      conn.query(query, [username, password, email], (err, rows) => { console.log("A regisztracio sikeres volt."); });
+      console.log("Már létezik ilyen felhasználónév");
     }
-    
-  });
+  })
 });
 
 app.post('/createServer', (req, res) => {
