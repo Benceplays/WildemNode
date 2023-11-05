@@ -61,4 +61,36 @@ app.post('/registration',(req, res) => {
   });
 });
 
+app.post('/createServer', (req, res) => {
+  let query = `INSERT INTO servers (servername, serverip, serverdescription, servercategory) VALUES (?, ?, ?, ?);`;
+  let existsql = `SELECT * FROM servers WHERE servername='${req.body["data"]["SName"]}';`;
+  conn.query(existsql, function (err, result, fields) {
+    if (err) {
+      console.error('Adatbázis hiba: ' + err);
+      res.send('Hiba történt az adatbáziskapcsolat során.');
+    } else {
+      if (!result.length){
+        conn.query(query, [req.body["data"]["SName"], req.body["data"]["SIp"], req.body["data"]["SDescription"], req.body["data"]["SCategory"]], (err, rows)=> {
+          console.log("Sikeres szerver regisztracio!");
+        });
+      }
+      else{
+        console.log("A megadott nevvel mar letezik szerver!")
+      }
+    }
+  });
+});
+
+app.post('/ServerSearch', (req, res) => {
+    let query = `SELECT * FROM servers;`;
+    conn.query(query, function (err, result, fields){
+      if (err) {
+          console.error('Adatbázis hiba: ' + err);
+          res.send('Hiba történt az adatbáziskapcsolat során.');
+      } else {
+          return res.send("teszt");
+      }
+    });
+});
+
 app.listen(port, function () { console.log(`bs app listening at http://localhost:${port}`); });
