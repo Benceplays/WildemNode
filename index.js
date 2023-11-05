@@ -23,16 +23,20 @@ app.use(
 
 app.post('/login',(req, res) => {
   JSON.parse(JSON.stringify(req.body));
-  conn.query("SELECT * FROM users", function (err, result, fields) {
-    let encryptedpasswd = crypto.createHash('md5').update(req.body["data"]["Passwd"]).digest("hex")
-    console.log(encryptedpasswd);
-    if (result[0]["username"] == req.body["data"]["Uname"]){
-      if (encryptedpasswd == result[0]["password"]){
+  let encryptedpasswd = crypto.createHash('md5').update(req.body["data"]["Passwd"]).digest("hex")
+  var sql = `SELECT * FROM users WHERE username='${req.body["data"]["Uname"]}' AND password='${encryptedpasswd}'`;
+  conn.query(sql, function (err, result, fields) {
+    if (err) {
+      console.error('Adatbázis hiba: ' + err);
+      res.send('Hiba történt az adatbáziskapcsolat során.');
+    } else {
+      if (result.length > 0) {
         console.log("Sikeres bejelentkezés.")
+      } 
+      else {
+        console.log("Felhasználónév vagy jelszó téves.")
       }
-      else{ console.log("Felhasználónév vagy jelszó téves."); }
-    }
-    else{ console.log("Felhasználónév vagy jelszó téves."); }
+    } 
   });
 });
 
